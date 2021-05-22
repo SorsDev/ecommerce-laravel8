@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Models\Category;
 use App\Http\Models\Product;
+use App\Http\Models\PGallery;
 use Validator, Str, Config, Image;
 
 class ProductController extends Controller
@@ -18,7 +19,7 @@ class ProductController extends Controller
 
     public function getHome()
     {
-        $products = Product::with(['cat'])->orderBy('id','desc')->paginate(25);
+        $products = Product::with(['cat'])->orderBy('id','desc')->paginate(8);
         $data = ['products' => $products ];
     	return view('admin.products.home', $data);
     }
@@ -114,7 +115,9 @@ class ProductController extends Controller
         if($validator->fails()):
             return back()->withErrors($validator)->with('message','Se ha producido un error.')->with('typealert','danger')->withInput();
         else:
-            $product =Product::find($id);
+            $product =Product::findOrFail($id);
+            $ipp = $product->file_path;
+            $ip = $product->image;
             $product->status = $request->input('status');
             $product->name = e($request->input('name'));
             $product->category_id = $request->input('category');
@@ -142,10 +145,74 @@ class ProductController extends Controller
                         $constraint->upsize();
                     });
                     $img->save($upload_path.'/'.$path.'/t_'.$filename);
+                    unlink($upload_path.'/'.$ipp.'/'.$ip);
+                    unlink($upload_path.'/'.$ipp.'/t_'.$ip);
                 endif;
                 return back()->with('message','Actualizado con éxito.')->with('typealert','success');
             endif;
         endif;
+    }
+
+    public function postProductGalleryAdd($id, Request $request)
+    {
+        $rules = [
+            'file_image' => 'required',
+        ]; 
+
+        $messages = [
+            'file_image.required' => 'El nombre del producto es requerido',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+        if($validator->fails()):
+            return back()->withErrors($validator)->with('message','Se ha producido un error.')->with('typealert','danger')->withInput();
+        else:
+            if($request->hasFile('file_image')):
+                $path = '/'.date('Y-m-d'); //2021-02-06
+                $fileExt = trim($request->file('file_image')->getClientOriginalExtension());
+                $upload_path = Config::get('filesystems.disks.uploads.root');
+                $name = Str::slug(str_replace($fileExt, '', $request->file('file_image')->getClientOriginalName()));
+
+                $filename = rand(1,999).'-'.$name.'.'.$fileExt;
+                $file_file = $upload_path.'/'.$path.'/'.$filename;
+
+                $g = new PGallery;
+                $g->product_id = $id;
+                $g -> file_path = date('Y-m-d');
+                $g -> file_name = $filename;
+
+                if($g->save()):
+                    if($request->hasFile('file_image')):
+                        $fl = $request->file_image->storeAs($path,$filename,'uploads');
+                        $img = Image::make($file_file);
+                        $img->fit(256,256, function($constraint){
+                            $constraint->upsize();
+                        });
+                        $img->save($upload_path.'/'.$path.'/t_'.$filename);
+                    endif;
+                    return back()->with('message','Imagen subida con éxito.')->with('typealert','success');
+                endif;
+
+            endif;
+        endif;
+    }
+
+    public function getProductGalleryDelete($id, $gid)
+    {
+        $g = PGallery::findOrFail($gid);
+        $path = $g->file_path;
+        $file = $g->file_name;
+        $upload_path = Config::get('filesystems.disks.uploads.root');
+        if($g->product_id != $id)
+        {
+            return back()->with('message','La imagen no se puede eliminar.')->with('typealert','danger');
+        }else{
+            if($g->delete()):
+                unlink($upload_path.'/'.$path.'/'.$file);
+                unlink($upload_path.'/'.$path.'/t_'.$file);
+                return back()->with('message','La imagen borrada con éxito.')->with('typealert','success');
+            endif;
+        }
     }
 
 

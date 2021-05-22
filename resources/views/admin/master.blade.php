@@ -86,6 +86,8 @@
 			</div>	
 		</div>
 	</div>
+
+	<script src="{{ url('/static/js/admin.js?v='.time())}}"></script>
 	
 </body>
 </html>
