@@ -12,6 +12,7 @@ class CategoriesController extends Controller
     public function __Construct()
     {
     	$this->middleware('auth');
+        $this->middleware('user.status');
     	$this->middleware('isadmin');
     }
 

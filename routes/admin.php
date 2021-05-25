@@ -5,8 +5,10 @@ Route::prefix('/admin')->group(function()
 	Route::get('/', 'Admin\DashboardController@getDashboard')->name('dashboard');
 
 	//Module Users
-	Route::get('/users','Admin\UserController@getUsers')->name('user_list');
+	Route::get('/users/{status}','Admin\UserController@getUsers')->name('user_list');
 	Route::get('/users/{id}/edit','Admin\UserController@getUserEdit')->name('user_edit');
+	Route::get('/users/{id}/banned','Admin\UserController@getUserBanned')->name('user_banned');
+	Route::get('/users/{id}/permissions','Admin\UserController@getUserPermissions')->name('user_permissions');
 
 	//Module Products
 	Route::get('/products','Admin\ProductController@getHome')->name('products');

@@ -11,12 +11,17 @@ class UserController extends Controller
      public function __Construct()
     {
     	$this->middleware('auth');
+        $this->middleware('user.status');
     	$this->middleware('isadmin');
     }
 
-    public function getUsers()
+    public function getUsers($status)
     {
-    	$users = User::orderBy('id','Desc')->get();
+        if($status == 'all'):
+    	   $users = User::orderBy('id','Desc')->paginate(15);
+        else:
+           $users = User::where('status',$status)->orderBy('id','Desc')->paginate(15);
+        endif;
     	$data = ['users' => $users];
    	    return view('admin.users.home', $data);
     }
@@ -26,5 +31,28 @@ class UserController extends Controller
         $u = User::findOrFail($id);
         $data = ['u' => $u];
         return view('admin.users.user_edit',$data);
+    }
+
+    public function getUserBanned($id)
+    {
+        $u = User::findOrFail($id);
+        if($u -> status == "100"):
+            $u->status = "0";
+            $msg = "Usuario activo nuevamente";
+        else:
+            $u->status = "100";
+            $msg = "Usuario suspendido con éxito.";
+        endif;
+
+        if($u->save()):
+            return back()->with('message',$msg)->with('typealert','success');
+        endif;
+    }
+
+    public function getUserPermissions($id)
+    {
+        $u = User::findOrFail($id);
+        $data = ['u' => $u];
+        return view('admin.users.user_permissions',$data);
     }
 }

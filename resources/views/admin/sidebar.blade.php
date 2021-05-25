@@ -20,7 +20,7 @@
 				<a  href="{{ url('/admin') }}" class="lk-dashboard" > <i class="fas fa-home"></i> Dashboard</a>
 			</li>
 			<li>
-				<a  href="{{ url('/admin/users') }}" class="lk-user_list lk-user_edit"> <i class="fas fa-user-friends"></i> Usuarios</a>
+				<a  href="{{ url('/admin/users/all') }}" class="lk-user_list lk-user_edit lk-user_permissions"> <i class="fas fa-user-friends"></i> Usuarios</a>
 			</li>
 			<li>
 				<a  href="{{ url('/admin/products') }}" class="lk-products lk-products_add lk-products_edit lk-products_gallery_add"> <i class="fas fa-boxes"></i> Productos</a>
