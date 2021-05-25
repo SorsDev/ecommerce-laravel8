@@ -18,7 +18,13 @@ class UserController extends Controller
     {
     	$users = User::orderBy('id','Desc')->get();
     	$data = ['users' => $users];
-;    	return view('admin.users.home', $data);
+   	    return view('admin.users.home', $data);
+    }
 
+    public function getUserEdit($id)
+    {
+        $u = User::findOrFail($id);
+        $data = ['u' => $u];
+        return view('admin.users.user_edit',$data);
     }
 }

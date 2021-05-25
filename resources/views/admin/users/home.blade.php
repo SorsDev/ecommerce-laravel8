@@ -36,11 +36,8 @@
 							<td>{{$user->email}}</td>
 							<td>
 								<div class="opts">
-									<a href="{{ url('/admin/user/'.$user->id.'/edit')}}">
+									<a href="{{ url('/admin/users/'.$user->id.'/edit')}}">
 										<i class="fas fa-edit"></i>
-									</a>
-									<a href="{{ url('/admin/user/'.$user->id.'/edit')}}">
-										<i class="fas fa-trash-alt"></i>
 									</a>
 								</div>
 							</td>
